@@ -39,9 +39,10 @@ def sgn(x):
 if __name__ == '__main__':
 
     # fndamental
-    r0 = 6378.137  # [km]
-    J2 = 1.082626683553151e-3
-    J3 = -2.5326564853322355e-6
+    ae = 6378.137  # [km]
+    # J2 = 1.082626683553151e-3
+    J2 = 1.082626684e-3
+    J3 = -2.53265649e-6
     # GM = 398600.4418 #[km**3/s**2]
     GM = 398600.5  # [km**3/s**2]
 
@@ -80,7 +81,7 @@ if __name__ == '__main__':
 
     # aksenov 2007 str. -37-
     tmp = sqrt(J2 - (J3 / (2 * J2)) ** 2)
-    c = r0 * tmp
+    c = ae * tmp
 
     # c = 0
     # c = 209.729063
@@ -94,28 +95,36 @@ if __name__ == '__main__':
 
     mprint('sigma')
 
-    # aksenov 2007 str. -62-
-    r0dash2 = x0 ** 2 + y0 ** 2 + (z0 - c * sigma) ** 2
-    mprint('r0dash2')
+    # BS + WG
+    print(30*'-')
+
+    r02 = x0 ** 2 + y0 ** 2 + (z0 - c * sigma) ** 2
+    r0 = sqrt(r02)
+    mprint('r02', 'r0')
+
     V02 = x0dot ** 2 + y0dot ** 2 + z0dot ** 2
     V0 = sqrt(V02)
     mprint('V02', 'V0')
+
     r01 = x0 * x0dot + y0 * y0dot + (z0 - c * sigma) * z0dot
     mprint('r01')
-    xi02 = ((r0dash2 - c2) / 2) * (1 + sqrt(1 + (4 * c2 * (z0 - c * sigma) ** 2) / ((r0dash2 - c2) ** 2)))
+
+    xi02 = ((r02 - c2) / 2) * (1 + sqrt(1 + (4 * c2 * (z0 - c * sigma) ** 2) / ((r02 - c2) ** 2)))
     xi0 = sqrt(xi02)
     mprint('xi0')
+
     eta0 = (z0 - c * sigma) / xi0
     eta02 = eta0 * eta0
     mprint('eta0')
-    cosw0 = x0 / sqrt(x0 ** 2 + y0 ** 2)
-    sinw0 = y0 / sqrt(x0 ** 2 + y0 ** 2)
-    mprint('cosw0')
-    mprint('sinw0', sinw0)
-    w0 = atan2(sinw0, cosw0)
+
+    # cosw0 = x0 / sqrt(x0 ** 2 + y0 ** 2)
+    # sinw0 = y0 / sqrt(x0 ** 2 + y0 ** 2)
+    # mprint('cosw0')
+    # mprint('sinw0', sinw0)
+
+    w0 = atan2(y0, x0)
     mprint('w0')
 
-    # aks 2007 str. -55-
     J0 = xi02 + c2 * eta02
     mprint('J0')
 
@@ -127,7 +136,7 @@ if __name__ == '__main__':
     w0dot = (x0 * y0dot - y0 * x0dot) / ((xi02 + c2) * (1 - eta02))
     mprint('w0dot')
     alpha1 = (V02 / 2.0) - (GM * (xi0 - c * sigma * eta0)) / (xi02 + c2 * eta02)
-    alpha22 = r0dash2 * V02 - r01 ** 2 - c2 * z0dot ** 2 + (2 * GM * xi0 * eta0 * (c2 * eta0 + c * sigma * xi0)) / (
+    alpha22 = r02 * V02 - r01 ** 2 - c2 * z0dot ** 2 + (2 * GM * xi0 * eta0 * (c2 * eta0 + c * sigma * xi0)) / (
                 xi02 + c2 * eta02)
     alpha2 = sqrt(alpha22)
     alpha3 = -x0dot * y0 + y0dot * x0
@@ -232,6 +241,10 @@ if __name__ == '__main__':
 
     mprint('a')
     mprint('e')
+
+    # Nasonova
+
+
 
     # wielomian F(eta)
     cf4 = -2 * alpha1 * c2
