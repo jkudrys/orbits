@@ -9,6 +9,8 @@ from scipy.special import ellipk, ellipkinc
 
 rod = 180 / pi
 
+# ver. 0.2019-10-06
+# monografia BS + WG
 
 def mprint(*arg):  # *arg - dowolna liczba argumentow
     # arg - string zawierajacy nazwe zmiennej
