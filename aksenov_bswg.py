@@ -58,6 +58,73 @@ def first_integ(GM, v02, r02, r01, xi0, eta0):
     return alpha1, alpha2, alpha3
 
 
+def axis_a(GM, c, alpha1, alpha2, alpha3):
+    # series from BS + WG page 37
+    eps_n = GM * c / alpha2 ** 2
+    A = GM / sqrt(-2 * alpha1)
+
+    a = -GM / (2 * alpha1) * (1 - eps_n ** 2 * alpha3 ** 2 / A ** 2 -
+                              eps_n ** 4 * (alpha3 ** 2 / A ** 2) * ((-4 + 8 * alpha3 ** 2 / alpha2 ** 2) +
+                                                                     alpha2 ** 2 / A ** 2 * (
+                                                                             2 - 3 * alpha3 ** 2 / alpha2 ** 2)) -
+                              eps_n ** 6 * (alpha3 ** 2 / A ** 2) * (
+                                      (16 - 96 * alpha3 ** 2 / alpha2 ** 2 + 112 * alpha3 ** 4 / alpha2 ** 4) +
+                                      alpha2 ** 2 / A ** 2 * (
+                                              -16 + 80 * alpha3 ** 2 / alpha2 ** 2 - 80 * alpha3 ** 4 / alpha2 ** 4) +
+                                      alpha2 ** 4 / A ** 4 * (
+                                              3 - 12 * alpha3 ** 2 / alpha2 ** 2 + 10 * alpha3 ** 4 / alpha2 ** 4)))
+
+    e2 = 1 - (alpha2 ** 2 / A ** 2) * (1 - eps_n ** 2 * alpha3 ** 2 / alpha2 ** 2 * (4 - 3 * alpha2 ** 2 / A ** 2) -
+                                       eps_n ** 4 * alpha3 ** 2 / alpha2 ** 2 * ((-16 + 32 * alpha3 ** 2 / A ** 2) +
+                                                                                 alpha2 ** 2 / A ** 2 * (
+                                                                                         20 - 28 * alpha3 ** 2 / A ** 2) +
+                                                                                 alpha2 ** 4 / A ** 4 * (
+                                                                                         -5 + 2 * alpha3 ** 2 / A ** 2)) -
+                                       eps_n ** 6 * ((64 - 384 * alpha3 ** 2 / A ** 2 + 448 * alpha3 ** 4 / A ** 4) +
+                                                     alpha2 ** 2 / A ** 2 * (
+                                                             -112 + 544 * alpha3 ** 2 / A ** 2 - 528 * alpha3 ** 4 / A ** 4) +
+                                                     alpha2 ** 4 / A ** 4 * (
+                                                             56 - 192 * alpha3 ** 2 / A ** 2 + 136 * alpha3 ** 4 / A ** 4) +
+                                                     alpha2 ** 6 / A ** 6 * (
+                                                             -7 + 9 * alpha3 ** 2 / A ** 2 - 3 * alpha3 ** 4 / A ** 4)))
+
+    return a, sqrt(e2)
+
+
+def orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3):
+    # series from BS + WG page 37
+    eps_n = GM * c / alpha2 ** 2
+    A = GM / sqrt(-2 * alpha1)
+
+    a2_A = alpha2 / A
+    a3_A = alpha3 / A
+    a3_a2 = alpha3 / alpha2
+
+    a = -GM / (2 * alpha1) * (1 - eps_n ** 2 * a3_A ** 2 -
+                              eps_n ** 4 * (a3_A ** 2) * ((-4 + 8 * a3_a2 ** 2) +
+                                                          a2_A ** 2 * (2 - 3 * a3_a2 ** 2)) -
+                              eps_n ** 6 * (a3_A ** 2) * ((16 - 96 * a3_a2 ** 2 + 112 * a3_a2 ** 4) +
+                                                          a2_A ** 2 * (-16 + 80 * a3_a2 ** 2 - 80 * a3_a2 ** 4) +
+                                                          a2_A ** 4 * (3 - 12 * a3_a2 ** 2 + 10 * a3_a2 ** 4)))
+
+    e2 = 1 - (a2_A ** 2) * (1 - eps_n ** 2 * a3_a2 ** 2 * (4 - 3 * a2_A ** 2) -
+                            eps_n ** 4 * a3_a2 ** 2 * ((-16 + 32 * a3_A ** 2) +
+                                                       a2_A ** 2 * (20 - 28 * a3_A ** 2) +
+                                                       a2_A ** 4 * (-5 + 2 * a3_A ** 2)) -
+                            eps_n ** 6 * ((64 - 384 * a3_A ** 2 + 448 * a3_A ** 4) +
+                                          a2_A ** 2 * (-112 + 544 * a3_A ** 2 - 528 * a3_A ** 4) +
+                                          a2_A ** 4 * (56 - 192 * a3_A ** 2 + 136 * a3_A ** 4) +
+                                          a2_A ** 6 * (-7 + 9 * a3_A ** 2 - 3 * a3_A ** 4)))
+
+    s2 = 1 - a3_a2 ** 2 * (1 + eps_n ** 2 * a2_A ** 2 * (1 - a3_a2 ** 2) +
+                           eps_n ** 2 * sigma ** 2 * (6 - 7 * a3_a2 ** 2) +
+                           eps_n ** 4 * a2_A ** 4 * (1 - a3_a2 ** 2) * (1 - 2 * a3_a2 ** 2) +
+                           2 * eps_n ** 4 * sigma ** 2 * a2_A ** 2 * (9 - 33 * a3_a2 ** 2 + 25 * a3_a2 ** 4) +
+                           eps_n ** 6 * a2_A ** 6 * (1 - a3_a2 ** 2) * (1 - 5 * a3_a2 ** 2 + 5 * a3_a2 ** 4))
+
+    return a, sqrt(e2), sqrt(s2)
+
+
 if __name__ == '__main__':
     x0 = 18693.056970  # [km]
     y0 = -3373.018460
@@ -72,3 +139,7 @@ if __name__ == '__main__':
     alpha1, alpha2, alpha3 = first_integ(GM, v02, r02, r01, xi0, eta0)
 
     print(alpha1, alpha2, alpha3)
+
+    a, e, s = orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3)
+
+    print(a, e, s)
