@@ -52,12 +52,12 @@ if __name__ == '__main__':
     m = 0
     n = 2
     k = 1
-    J2 = C20 / sqrt(factorial(n + m) / (factorial(n - m) * (2 * n + 1) * k))
+    # J2 = C20 / sqrt(factorial(n + m) / (factorial(n - m) * (2 * n + 1) * k))
     mprint('J2')
     m = 0
     n = 3
     k = 1
-    J3 = C30 / sqrt(factorial(n + m) / (factorial(n - m) * (2 * n + 1) * k))
+    # J3 = C30 / sqrt(factorial(n + m) / (factorial(n - m) * (2 * n + 1) * k))
     mprint('J3')
 
     # epoch
@@ -172,7 +172,7 @@ if __name__ == '__main__':
     xiroot2 = float(xiroots[3])
     mprint('xiroot2')
 
-    eps = 1e-8  # 0.01 mm
+    eps = 1e-9  # 0.001 mm
     # root polish newton
 
     i = 0
@@ -241,9 +241,6 @@ if __name__ == '__main__':
 
     mprint('a')
     mprint('e')
-
-    # Nasonova
-
 
 
     # wielomian F(eta)
@@ -398,6 +395,9 @@ if __name__ == '__main__':
     mprint('kbar22')
     mprint('sigmabar2')
     mprint('sigma2')
+
+    print(30*'-')
+
     # aksenov 2007 str. -101-
     eta1 = deltastar
     eta2 = delta
@@ -439,6 +439,7 @@ if __name__ == '__main__':
     mprint('k12')
     mprint('sigma1')
 
+    print(30*'-')
 
     # definicja n!!
     def dfact(n):
