@@ -1,28 +1,28 @@
 #!/usr/bin/env python3
 
-from numpy import sqrt, arctan2
+from numpy import sqrt, arctan2, arccos
 
 # fndamental
 ae = 6378.137  # [km]
 # J2 = 1.082626683553151e-3
 J2 = 1.082626684e-3
 J3 = -2.53265649e-6
-# GM = 398600.4418 #[km**3/s**2]
-GM = 398600.5  # [km**3/s**2]
+GM = 398600.4418 #[km**3/s**2]
+# GM = 398600.5  # [km**3/s**2]
 
 # J2,J3 coefficients
 C20 = 0.484165371736e-3
 C30 = -0.957254173792e-6
 
 tmp = sqrt(J2 - (J3 / (2 * J2)) ** 2)
-c = ae * tmp
+# c = ae * tmp
+# c = 0
+c = 209.7290630223342
 c2 = c * c
 
-# c = 0
-# c = 209.729063
 
-sigma = J3 / (2 * J2 * tmp)
-
+# sigma = J3 / (2 * J2 * tmp)
+sigma = -0.035571550267469
 
 # sigma = 0
 # sigma = -0.03557155
@@ -130,28 +130,30 @@ def orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3):
 def orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot):
     eps = c / (a * (1 - e ** 2))
     ebar = e * (1 + eps ** 2 * (1 - e ** 2) * (1 - 2 * s ** 2)
-                - 4 * eps**2 * sigma * s * (1 - e**2) * (1 - s**2)
+                # - 4 * eps**3 * sigma * s * (1 - e**2) * (1 - s**2)
                 + eps ** 4 * (1 - e ** 2) * ((3 - 16 * s ** 2 + 14 * s ** 4)
                 - 2 * e ** 2 * (1 - s ** 2) ** 2))
 
-    sigma2 = sqrt(GM * a * (1 - e ** 2)) * (1 - eps ** 2 / 2 * (3 - 4 * s ** 2 - e ** 2) -
-                                            eps ** 4 / 8 * ((8 - 72 * s ** 2 + 64 * s ** 4) + e ** 2 * (
-                        2 - 40 * s ** 2 + 48 * s ** 4) + e ** 4))
+    sigma2 = sqrt(GM * a * (1 - e ** 2)) * (1 - (eps ** 2 / 2) * (3 - 4 * s ** 2 - e ** 2)
+                                            # + 4 * eps**3 * sigma * s * (1 - s**2)
+                                            - (eps ** 4 / 8) * ((8 - 72 * s ** 2 + 64 * s ** 4)
+                                            + e ** 2 * (2 - 40 * s ** 2 + 48 * s ** 4) + e ** 4))
 
     k22 = eps**2 * e**2 *(s**2 - eps**2 * (1 - 10*s**2 + 11*s**4 + e**2*s**4))
 
-    xi0dot = a*e*sigma2*(1-ebar**2)
+    # xi0dot = a*e*sigma2*(1-ebar**2)
 
     cos_psi0 = (a*(1-e*ebar)-xi0)/(xi0*ebar - a*(ebar-e))
     j0 = xi0**2 + c**2*eta0**2
-    sin_psi0 = a*e*(1-ebar**2)*j0*xi0dot
+    # sin_psi0 = a*e*(1-ebar**2)*j0*xi0dot
 
-    # xi0dot = (xi0 * r01 - c * c * eta0 * z0dot) / (xi0 * xi0 + c * c * eta0 * eta0)
+    xi0dot = (xi0 * r01 + c * c * eta0 * z0dot) / (xi0 * xi0 + c * c * eta0 * eta0)
 
     cos_E = (a - xi0)/(a*e)
     # cos_psi =
+    # xi0dot = (xi0*(x0*x0dot + y0*y0dot + (z0 -c*sigma)*z0dot) - c**2*eta0*z0dot)/(xi0**2 + c**2*eta0**2)
 
-    return eps, ebar, sigma2, xi0dot, k22
+    return eps, ebar, sigma2, xi0dot, k22, cos_psi0
 
 
 if __name__ == '__main__':
@@ -165,6 +167,7 @@ if __name__ == '__main__':
     state_vec = (x0, y0, z0, x0dot, y0dot, z0dot)
 
     xi0, eta0, w0, v02, r02, r01 = spheroidal_coords(state_vec, c, sigma)
+    print(xi0, eta0, w0, v02, r02, r01)
 
     alpha1, alpha2, alpha3 = first_integ(GM, v02, r02, r01, xi0, eta0)
     print(alpha1, alpha2, alpha3)
@@ -172,5 +175,5 @@ if __name__ == '__main__':
     a, e, s = orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3)
     print(a, e, s)
 
-    eps, ebar, sigma2, xi0dot, k22 = orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot)
-    print(eps, ebar, sigma2, xi0dot, k22)
+    eps, ebar, sigma2, xi0dot, k22, cos_psi0 = orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot)
+    print(eps, ebar, sigma2, xi0dot, k22, arccos(cos_psi0))

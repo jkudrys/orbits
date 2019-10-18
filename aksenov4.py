@@ -43,8 +43,8 @@ if __name__ == '__main__':
     # J2 = 1.082626683553151e-3
     J2 = 1.082626684e-3
     J3 = -2.53265649e-6
-    # GM = 398600.4418 #[km**3/s**2]
-    GM = 398600.5  # [km**3/s**2]
+    GM = 398600.4418 #[km**3/s**2]
+    # GM = 398600.5  # [km**3/s**2]
 
     # J2,J3 coefficients
     C20 = 0.484165371736e-3
@@ -81,15 +81,16 @@ if __name__ == '__main__':
 
     # aksenov 2007 str. -37-
     tmp = sqrt(J2 - (J3 / (2 * J2)) ** 2)
-    c = ae * tmp
+    # c = ae * tmp
 
     # c = 0
     # c = 209.729063
-
+    c = 209.7290630223342
     mprint('c')
     c2 = c * c
-    sigma = J3 / (2 * J2 * tmp)
 
+    # sigma = J3 / (2 * J2 * tmp)
+    sigma = -0.035571550267469
     # sigma = 0
     # sigma = -0.03557155
 
@@ -129,7 +130,7 @@ if __name__ == '__main__':
     mprint('J0')
 
     # aksenov 2007 str. -63-
-    xi0dot = (xi0 * r01 - c2 * eta0 * z0dot) / (xi02 + c2 * eta02)
+    xi0dot = (xi0 * r01 + c2 * eta0 * z0dot) / (xi02 + c2 * eta02)
     mprint('xi0dot')
     eta0dot = (z0dot - xi0dot * eta0) / xi0
     mprint('eta0dot')
@@ -277,7 +278,7 @@ if __name__ == '__main__':
         etaroot2 = float(etaroots[1])
         mprint('etaroot2')
 
-    eps = 1e-8  # 0.01 mm
+    eps = 1e-9  # 0.01 mm
 
     # root polish newton
     i = 0
@@ -376,6 +377,9 @@ if __name__ == '__main__':
 
     xi2 = xiroot2
     xi1 = xiroot1
+
+    # xi1 = a*(1-e)
+    # xi2 = a*(1+e)
 
     # aksenov 2007 str. -100-
     n1 = sqrt(p * p + q * q - 2 * p * xi2 + xi2 ** 2)
