@@ -1,13 +1,20 @@
 #!/usr/bin/env python3
 
+
 from numpy import sqrt, arctan2, arccos
+
+
+def print_var(*vars):
+    for var in vars:
+        print(f'{var} = {eval(var)}')
+
 
 # fndamental
 ae = 6378.137  # [km]
 # J2 = 1.082626683553151e-3
 J2 = 1.082626684e-3
 J3 = -2.53265649e-6
-GM = 398600.4418 #[km**3/s**2]
+GM = 398600.4418  # [km**3/s**2]
 # GM = 398600.5  # [km**3/s**2]
 
 # J2,J3 coefficients
@@ -20,9 +27,9 @@ tmp = sqrt(J2 - (J3 / (2 * J2)) ** 2)
 c = 209.7290630223342
 c2 = c * c
 
-
 # sigma = J3 / (2 * J2 * tmp)
 sigma = -0.035571550267469
+
 
 # sigma = 0
 # sigma = -0.03557155
@@ -60,37 +67,6 @@ def first_integ(GM, v02, r02, r01, xi0, eta0):
     return alpha1, alpha2, alpha3
 
 
-def axis_a(GM, c, alpha1, alpha2, alpha3):
-    # series from BS + WG page 37
-    eps_n = GM * c / alpha2 ** 2
-    A = GM / sqrt(-2 * alpha1)
-
-    a = -GM / (2 * alpha1) * (1 - eps_n ** 2 * alpha3 ** 2 / A ** 2 -
-                              eps_n ** 4 * (alpha3 ** 2 / A ** 2) * ((-4 + 8 * alpha3 ** 2 / alpha2 ** 2) +
-                                                                     alpha2 ** 2 / A ** 2 * (
-                                                                             2 - 3 * alpha3 ** 2 / alpha2 ** 2)) -
-                              eps_n ** 6 * (alpha3 ** 2 / A ** 2) * (
-                                      (16 - 96 * alpha3 ** 2 / alpha2 ** 2 + 112 * alpha3 ** 4 / alpha2 ** 4) +
-                                      alpha2 ** 2 / A ** 2 * (
-                                              -16 + 80 * alpha3 ** 2 / alpha2 ** 2 - 80 * alpha3 ** 4 / alpha2 ** 4) +
-                                      alpha2 ** 4 / A ** 4 * (
-                                              3 - 12 * alpha3 ** 2 / alpha2 ** 2 + 10 * alpha3 ** 4 / alpha2 ** 4)))
-
-    e2 = 1 - (alpha2 ** 2 / A ** 2) * (1 - eps_n ** 2 * alpha3 ** 2 / alpha2 ** 2 * (4 - 3 * alpha2 ** 2 / A ** 2) -
-                                       eps_n ** 4 * alpha3 ** 2 / alpha2 ** 2 * ((-16 + 32 * alpha3 ** 2 / A ** 2) +
-                                                                                 alpha2 ** 2 / A ** 2 * (
-                                                                                         20 - 28 * alpha3 ** 2 / A ** 2) +
-                                                                                 alpha2 ** 4 / A ** 4 * (
-                                                                                         -5 + 2 * alpha3 ** 2 / A ** 2)) -
-                                       eps_n ** 6 * ((64 - 384 * alpha3 ** 2 / A ** 2 + 448 * alpha3 ** 4 / A ** 4) +
-                                                     alpha2 ** 2 / A ** 2 * (
-                                                             -112 + 544 * alpha3 ** 2 / A ** 2 - 528 * alpha3 ** 4 / A ** 4) +
-                                                     alpha2 ** 4 / A ** 4 * (
-                                                             56 - 192 * alpha3 ** 2 / A ** 2 + 136 * alpha3 ** 4 / A ** 4) +
-                                                     alpha2 ** 6 / A ** 6 * (
-                                                             -7 + 9 * alpha3 ** 2 / A ** 2 - 3 * alpha3 ** 4 / A ** 4)))
-
-    return a, sqrt(e2)
 
 
 def orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3):
@@ -109,14 +85,25 @@ def orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3):
                                                           a2_A ** 2 * (-16 + 80 * a3_a2 ** 2 - 80 * a3_a2 ** 4) +
                                                           a2_A ** 4 * (3 - 12 * a3_a2 ** 2 + 10 * a3_a2 ** 4)))
 
+    # bs+wg mono
+    # e2 = 1 - (a2_A ** 2) * (1 - eps_n ** 2 * a3_a2 ** 2 * (4 - 3 * a2_A ** 2) -
+    #                         eps_n ** 4 * a3_a2 ** 2 * ((-16 + 32 * a3_A ** 2) +
+    #                                                    a2_A ** 2 * (20 - 28 * a3_A ** 2) +
+    #                                                    a2_A ** 4 * (-5 + 2 * a3_A ** 2)) -
+    #                         eps_n ** 6 * a3_a2 ** 2 * ((64 - 384 * a3_A ** 2 + 448 * a3_A ** 4) +
+    #                                                     a2_A ** 2 * (-112 + 544 * a3_A ** 2 - 528 * a3_A ** 4) +
+    #                                                     a2_A ** 4 * (56 - 192 * a3_A ** 2 + 136 * a3_A ** 4) +
+    #                                                     a2_A ** 6 * (-7 + 9 * a3_A ** 2 - 3 * a3_A ** 4)))
+
+    # bs
     e2 = 1 - (a2_A ** 2) * (1 - eps_n ** 2 * a3_a2 ** 2 * (4 - 3 * a2_A ** 2) -
-                            eps_n ** 4 * a3_a2 ** 2 * ((-16 + 32 * a3_A ** 2) +
-                                                       a2_A ** 2 * (20 - 28 * a3_A ** 2) +
-                                                       a2_A ** 4 * (-5 + 2 * a3_A ** 2)) -
-                            eps_n ** 6 * ((64 - 384 * a3_A ** 2 + 448 * a3_A ** 4) +
-                                          a2_A ** 2 * (-112 + 544 * a3_A ** 2 - 528 * a3_A ** 4) +
-                                          a2_A ** 4 * (56 - 192 * a3_A ** 2 + 136 * a3_A ** 4) +
-                                          a2_A ** 6 * (-7 + 9 * a3_A ** 2 - 3 * a3_A ** 4)))
+                            eps_n ** 4 * a3_a2 ** 2 * ((-16 + 32 * a3_a2 ** 2) +
+                                                       a2_A ** 2 * (20 - 28 * a3_a2 ** 2) +
+                                                       a2_A ** 4 * (-5 + 2 * a3_a2 ** 2)) -
+                            eps_n ** 6 * a3_a2 ** 2 * ((64 - 384 * a3_a2 ** 2 + 448 * a3_a2 ** 4) +
+                                                       a2_A ** 2 * (-112 + 544 * a3_a2 ** 2 - 528 * a3_a2 ** 4) +
+                                                       a2_A ** 4 * (56 - 192 * a3_a2 ** 2 + 136 * a3_a2 ** 4) +
+                                                       a2_A ** 6 * (-7 + 9 * a3_a2 ** 2 - 3 * a3_a2 ** 4)))
 
     s2 = 1 - a3_a2 ** 2 * (1 + eps_n ** 2 * a2_A ** 2 * (1 - a3_a2 ** 2) +
                            eps_n ** 2 * sigma ** 2 * (6 - 7 * a3_a2 ** 2) +
@@ -132,28 +119,33 @@ def orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot):
     ebar = e * (1 + eps ** 2 * (1 - e ** 2) * (1 - 2 * s ** 2)
                 # - 4 * eps**3 * sigma * s * (1 - e**2) * (1 - s**2)
                 + eps ** 4 * (1 - e ** 2) * ((3 - 16 * s ** 2 + 14 * s ** 4)
-                - 2 * e ** 2 * (1 - s ** 2) ** 2))
+                                             - 2 * e ** 2 * (1 - s ** 2) ** 2))
+    sigma1 = sqrt(GM * a * (1 - e ** 2)) * (1 + eps ** 2 * (1 - s ** 2) * (3 + e ** 2) / 2
+                                            + eps ** 2 * sigma ** 2 * (6 - 7 * s ** 2) / 2
+                                            - eps ** 4 * (1 - s ** 2) * ((9 + 11 * s ** 2)
+                                                                         + e ** 2 * (6 + 34 * s ** 4)
+                                                                         + e ** 4 * (1 + 3 * s ** 2)) / 8)
 
     sigma2 = sqrt(GM * a * (1 - e ** 2)) * (1 - (eps ** 2 / 2) * (3 - 4 * s ** 2 - e ** 2)
                                             # + 4 * eps**3 * sigma * s * (1 - s**2)
                                             - (eps ** 4 / 8) * ((8 - 72 * s ** 2 + 64 * s ** 4)
-                                            + e ** 2 * (2 - 40 * s ** 2 + 48 * s ** 4) + e ** 4))
+                                                                + e ** 2 * (2 - 40 * s ** 2 + 48 * s ** 4) + e ** 4))
 
-    k22 = eps**2 * e**2 *(s**2 - eps**2 * (1 - 10*s**2 + 11*s**4 + e**2*s**4))
-
+    k22 = eps ** 2 * e ** 2 * (s ** 2 - eps ** 2 * (1 - 10 * s ** 2 + 11 * s ** 4 + e ** 2 * s ** 4))
+    k12 = eps ** 2 * s ** 2 * (1 + sigma ** 2 - e ** 2 - 4 * eps ** 2 * (1 - s ** 2) * (1 - e ** 2))
     # xi0dot = a*e*sigma2*(1-ebar**2)
 
-    cos_psi0 = (a*(1-e*ebar)-xi0)/(xi0*ebar - a*(ebar-e))
-    j0 = xi0**2 + c**2*eta0**2
+    cos_psi0 = (a * (1 - e * ebar) - xi0) / (xi0 * ebar - a * (ebar - e))
+    j0 = xi0 ** 2 + c ** 2 * eta0 ** 2
     # sin_psi0 = a*e*(1-ebar**2)*j0*xi0dot
 
     xi0dot = (xi0 * r01 + c * c * eta0 * z0dot) / (xi0 * xi0 + c * c * eta0 * eta0)
 
-    cos_E = (a - xi0)/(a*e)
+    cos_E = (a - xi0) / (a * e)
     # cos_psi =
     # xi0dot = (xi0*(x0*x0dot + y0*y0dot + (z0 -c*sigma)*z0dot) - c**2*eta0*z0dot)/(xi0**2 + c**2*eta0**2)
 
-    return eps, ebar, sigma2, xi0dot, k22, cos_psi0
+    return eps, ebar, sigma1, sigma2, xi0dot, k12, k22, cos_psi0
 
 
 if __name__ == '__main__':
@@ -166,14 +158,15 @@ if __name__ == '__main__':
 
     state_vec = (x0, y0, z0, x0dot, y0dot, z0dot)
 
+    print(30 * '*')
     xi0, eta0, w0, v02, r02, r01 = spheroidal_coords(state_vec, c, sigma)
-    print(xi0, eta0, w0, v02, r02, r01)
+    print_var('xi0', 'eta0', 'w0', 'v02', 'r02', 'r01')
 
     alpha1, alpha2, alpha3 = first_integ(GM, v02, r02, r01, xi0, eta0)
-    print(alpha1, alpha2, alpha3)
+    print_var('alpha1', 'alpha2', 'alpha3')
 
     a, e, s = orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3)
-    print(a, e, s)
+    print_var('a', 'e', 's')
 
-    eps, ebar, sigma2, xi0dot, k22, cos_psi0 = orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot)
-    print(eps, ebar, sigma2, xi0dot, k22, arccos(cos_psi0))
+    eps, ebar, sigma1, sigma2, xi0dot, k12, k22, cos_psi0 = orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot)
+    print_var('eps', 'ebar', 'sigma1', 'sigma2', 'xi0dot', 'k12', 'k22', 'arccos(cos_psi0)')
