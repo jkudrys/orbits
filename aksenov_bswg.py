@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from numpy import sqrt, arctan2, arccos, sign, arcsin, sin, cos, arctan, pi
+from numpy import sqrt, arctan2, arccos, sign, arcsin, sin, cos, arctan, pi, tan
 
 
 def m_print(*arg):  # *arg - dowolna liczba argumentow
@@ -238,8 +238,7 @@ def orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot):
     print(d, gamma, eta0dot, sin_theta0, cos_theta0, theta0)
 
     nu = (eps ** 2 / 4) * (1 + sigma ** 2) * (12 - 15 * s ** 2) + (eps ** 4 / 64) * (288 - 1296 * s ** 2 + 1035 * s ** 4
-                                                                                     - e ** 2 * (
-                                                                                             144 + 288 * s ** 2 - 510 * s ** 4))
+                                                                        - e ** 2 * (144 + 288 * s ** 2 - 510 * s ** 4))
     omega0 = theta0 - (1 + nu) * psi0 - (k12 / 8) * (1 + k12 / 2) * sin(2 * theta0) + (k22 / 8) * (
             1 + nu + k22 / 2) * sin(2 * psi0)
     omega1 = nu * psi0 + omega0
@@ -264,14 +263,41 @@ def orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot):
 
     omegahat = arctan2((cos_i * sin(theta0) + beta), cos(theta0))
     if omegahat < 0:
-        omegahat += 2*pi
+        omegahat += 2 * pi
     print(omegahat)
 
     OMEGA0 = omega0 - omegahat - mu * psi0 - mu1 * sin(psi0) - mu2 * sin(2 * psi0) - mu3 * sin(3 * psi0) \
              - mu4 * sin(4 * psi0) - mu11 * cos(psi0 + omega1) - mu21 * sin(2 * (psi0 + omega1))
     print('OMEGA0', OMEGA0)
 
-    return eps, ebar, sigma1, sigma2, xi0dot, k12, k22, psi0, theta0
+    E0 = 2 * arctan(sqrt((1 - ebar) / (1 + ebar)) * tan(psi0 / 2))
+    print(E0)
+
+    lm = -(3 / 16) * eps ** 4 * (1 - e ** 2) ** (3 / 2) * (8 - 32 * s ** 2 + 25 * s ** 4)
+    lm1 = -(1 / 4) * eps ** 4 * s ** 2 * e * (4 - 5 * s ** 2) * (1 - e ** 2) ** (3 / 2)
+    lm2 = (3 / 32) * eps ** 4 * s ** 4 * e ** 2 * (1 - e ** 2) ** (3 / 2)
+    lm11 = 0.5 * eps ** 3 * sigma * s * (4 - 5 * s ** 2) * (1 - e ** 2) ** (3 / 2)
+    lm21 = -(eps ** 2 / 4) * s ** 2 * (1 - e ** 2) ** (3 / 2) * (
+            1 - (eps ** 2 / 4) * ((12 - 13 * s ** 2) - e ** 2 * (4 - 5 * s ** 2)))
+    lm31 = -(eps ** 3 / 6) * sigma * s ** 3 * (1 - e ** 2) ** (3 / 2)
+    lm41 = -(eps ** 4 / 64) * s ** 4 * (1 - e ** 2) ** (5 / 2)
+    lm221 = (eps ** 4 / 16) * s ** 4 * e ** 2 * (1 - e ** 2) ** (3 / 2)
+
+    print('lm:', lm, lm1, lm2, lm11)
+    print('lm:', lm21, lm31, lm41, lm221)
+
+    # estar = -2*alpha1*a*e/GM
+    estar = e * (1 - eps ** 2 * (1 - e ** 2) * (1 - s ** 2) + eps ** 4 * s ** 2 * (1 - e ** 2) * (3 + e ** 2))
+    print('estar', estar)
+
+    M0 = E0 - estar * sin(E0) - lm * psi0 + lm1 * sin(psi0) + lm2 * sin(2 * psi0) + lm11 * cos(psi0 + omega1) \
+         + lm21 * sin(2 * (psi0 + omega1)) + lm31 * cos(3 * (psi0 + omega1)) + lm41 * sin(4 * (psi0 + omega1)) \
+         + lm221 * sin(2 * psi0) * cos(2 * (psi0 + omega1))
+
+    return eps, ebar, sigma1, sigma2, xi0dot, psi0, theta0, M0, OMEGA0, omega0
+
+def state_vec(dt, alpha1):
+    pass
 
 
 if __name__ == '__main__':
@@ -293,7 +319,7 @@ if __name__ == '__main__':
     a, e, s = orbit_axis2(GM, c, sigma, alpha1, alpha2, alpha3)
     m_print('a', 'e', 's')
 
-    eps, ebar, sigma1, sigma2, xi0dot, k12, k22, psi0, theta0 = \
+    eps, ebar, sigma1, sigma2, xi0dot, psi0, theta0, M0, OMEGA0, omega0 = \
         orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot)
     m_print('eps', 'ebar', 'sigma1', 'sigma2', 'xi0dot')
-    m_print('k12', 'k22', 'psi0', 'theta0')
+    m_print('OMEGA0', 'omega0', 'psi0', 'theta0', 'M0')
