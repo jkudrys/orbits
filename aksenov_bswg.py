@@ -21,8 +21,8 @@ ae = 6378.137  # [km]
 # J2 = 1.082626683553151e-3
 J2 = 1.082626684e-3
 J3 = -2.53265649e-6
-# GM = 3986004.418e8  # [m**3/s**2]
-GM = 398600.4418  # [km**3/s**2]
+GM = 3986004.418e8  # [m**3/s**2]
+# GM = 398600.4418  # [km**3/s**2]
 
 # J2,J3 coefficients
 C20 = 0.484165371736e-3
@@ -420,19 +420,19 @@ def s_vec(dt, alpha1, alpha3, a, e, s, OMEGA0, M0, omega0, c, sigma, GM):
 
 
 if __name__ == '__main__':
-    x0 = 18693.056970  # [km]
-    y0 = -3373.018460
-    z0 = 18420.184627
-    x0dot = 2.053622091  # [km/s]
-    y0dot = 2.928143773
-    z0dot = -1.526508464
+    # x0 = 18693.056970  # [km]
+    # y0 = -3373.018460
+    # z0 = 18420.184627
+    # x0dot = 2.053622091  # [km/s]
+    # y0dot = 2.928143773
+    # z0dot = -1.526508464
 
-    # x0 = 18693056.970  # [m]
-    # y0 = -3373018.460
-    # z0 = 18420184.627
-    # x0dot = 2053.622091  # [m/s]
-    # y0dot = 2928.143773
-    # z0dot = -1526.508464
+    x0 = 18693056.970  # [m]
+    y0 = -3373018.460
+    z0 = 18420184.627
+    x0dot = 2053.622091  # [m/s]
+    y0dot = 2928.143773
+    z0dot = -1526.508464
 
 
 
@@ -455,3 +455,12 @@ if __name__ == '__main__':
     x, y, z, xdot, ydot, zdot = s_vec(0, alpha1, alpha3, a, e, s, OMEGA0, M0, omega0, c, sigma, GM)
     m_print('x', 'y', 'z')
     m_print('xdot', 'ydot', 'zdot')
+
+    print('diff [m]', 30*'-')
+
+    print('x-x0', x-x0)
+    print('y-y0', y-y0)
+    print('z-z0', z-z0)
+    print('xdot-x0dot', xdot-x0dot)
+    print('ydot-y0dot', ydot-y0dot)
+    print('zdot-z0dot', zdot-z0dot)
