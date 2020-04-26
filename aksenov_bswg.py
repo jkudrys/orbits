@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
 
 from numpy import sqrt, arctan2, arccos, sign, arcsin, sin, cos, arctan, pi, tan, arange
+from eci import *
 
-
-def m_print(*arg):  # *arg - dowolna liczba argumentow
-    for var in arg:
-        if isinstance(var, str):
-            if var in globals():
-                print(var, '=', eval(var), end='; ')
-            else:
-                print(var)
-        else:
-            print(var)
-    print()
+# def m_print(*arg):  # *arg - dowolna liczba argumentow
+#     for var in arg:
+#         if isinstance(var, str):
+#             if var in globals():
+#                 print(var, '=', eval(var), end='; ')
+#             else:
+#                 print(var)
+#         else:
+#             print(var)
+#     print()
 
 
 # fndamental const
 ae = 6378.137  # [km]
-J2 = 1.082626684e-3
-J3 = -2.53265649e-6
+# J2 = 1.082626684e-3
+# J3 = -2.53265649e-6
 GM = 398600.4418  # [km**3/s**2]
 
-C20 = 0.484165371736e-3
-C30 = -0.957254173792e-6
+# C20 = 0.484165371736e-3
+# C30 = -0.957254173792e-6
 
-tmp = sqrt(J2 - (J3 / (2 * J2)) ** 2)
+# tmp = sqrt(J2 - (J3 / (2 * J2)) ** 2)
 c = 209.729063022334
 c2 = c * c
 
@@ -51,7 +51,14 @@ def spheroidal_coords(state_vec_0, c, sigma):
     return xi0, eta0, w0, v02, r02, r01
 
 
-def first_integ(GM, v02, r02, r01, xi0, eta0):
+def first_integ(GM, v02, r02, r01, xi0, eta0, state_vec_0):
+    x0 = state_vec_0[0]
+    y0 = state_vec_0[1]
+    # z0 = state_vec_0[2]
+    x0dot = state_vec_0[3]
+    y0dot = state_vec_0[4]
+    z0dot = state_vec_0[5]
+
     xi02 = xi0 * xi0
     eta02 = eta0 * eta0
     alpha1 = (v02 / 2.0) - (GM * (xi0 - c * sigma * eta0)) / (xi02 + c2 * eta02)
@@ -63,7 +70,7 @@ def first_integ(GM, v02, r02, r01, xi0, eta0):
     return alpha1, alpha2, alpha3
 
 
-def orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3):
+def _orbit_axis(GM, c, sigma, alpha1, alpha2, alpha3):
     # series from BS + WG page 37
     eps_n = GM * c / alpha2 ** 2
     A = GM / sqrt(-2 * alpha1)
@@ -274,7 +281,7 @@ def s_vec(dt, alpha1, alpha3, a, e, s, OMEGA0, M0, omega0, c, sigma, GM):
     psi_i = 0
     omega_i = omega0
 
-    while abs(E - E0) > 1e-16:
+    while abs(E - E0) > 1e-15:
         E = E0
         psi_i = 2 * arctan(sqrt((1 + ebar) / (1 - ebar)) * tan(E / 2))
 
@@ -363,7 +370,7 @@ def s_vec(dt, alpha1, alpha3, a, e, s, OMEGA0, M0, omega0, c, sigma, GM):
 def orb_params(state_vector):
     x0, y0, z0, x0dot, y0dot, z0dot = state_vector
     xi0, eta0, w0, v02, r02, r01 = spheroidal_coords(state_vector, c, sigma)
-    alpha1, alpha2, alpha3 = first_integ(GM, v02, r02, r01, xi0, eta0)
+    alpha1, alpha2, alpha3 = first_integ(GM, v02, r02, r01, xi0, eta0, state_vector)
     a, e, s = orbit_axis2(GM, c, sigma, alpha1, alpha2, alpha3)
     eps, ebar, sigma1, sigma2, xi0dot, psi0, theta0, M0, OMEGA0, omega0 = \
         orbit_angle(GM, sigma, c, a, e, s, xi0, eta0, r01, z0dot, w0)
@@ -380,24 +387,77 @@ def propagate(dt, orb_params):
 
 if __name__ == '__main__':
 
-    x0 = 3.98131471724008E+0003
-    y0 = -1.37962749950665E+0004
-    z0 = 2.10809814453000E+0004
-    x0dot = 3.51016302791983E+0000
-    y0dot = -1.14609191177291E+0000
-    z0dot = -1.41139984131000E+0000
+    epoch = (2020, 1, 10, 9.75)
 
-    op = orb_params([x0, y0, z0, x0dot, y0dot, z0dot])
+    y, m, d, utc = epoch
+    era_0 = ERA(y, m, d, utc)
+    # era_0 = GMSTE(y, m, d, utc)
 
-    for dt in arange(0, 1801, 60):
-        [x, y, z, xdot, ydot, zdot] = propagate(dt, op)
-        print(dt, [x, y, z, xdot, ydot, zdot])
+    print('era_0', era_0)
+    era_0 = 4.45732210006827E+0000
 
-    # print('diff [m]', 30 * '-')
-    #
-    # print('x-x0', x - x0)
-    # print('y-y0', y - y0)
-    # print('z-z0', z - z0)
-    # print('xdot-x0dot', xdot - x0dot)
-    # print('ydot-y0dot', ydot - y0dot)
-    # print('zdot-z0dot', zdot - z0dot)
+    # x0    = 3.98131471724008E+0003
+    # y0    = -1.37962749950665E+0004
+    # z0    = 2.10809814453000E+0004
+    # x0dot = 3.51016302791983E+0000
+    # y0dot = -1.14609191177291E+0000
+    # z0dot = -1.41139984131000E+0000
+
+    # x0 = 0.123453901367E+05
+    # y0 = 0.733344482422E+04
+    # z0 = 0.210809814453E+05
+    # x0dot = 0.758125305176E+00
+    # y0dot = 0.278552722931E+01
+    # z0dot = -0.141139984131E+01
+
+    x0 = 2.10629971197374E+0004
+    y0 = -1.38002622118912E+0004
+    z0 = 4.10905029297000E+0003
+    x0dot = 1.43328434145711E+0000
+    y0dot = 1.14353971063452E+0000
+    z0dot = -3.50110244751000E+0000
+
+    ecef = [x0, y0, z0, x0dot, y0dot, z0dot]
+    print('ecef', ecef)
+
+    eci = ecef2eci(ecef, era_0)
+    print('eci', eci)
+
+    # eci = [x0, y0, z0, x0dot, y0dot, z0dot]
+    # print('eci', eci)
+
+    # eci = [3981.314717240103, -13796.274995066464, 21080.9814453, 3.510163027919828, -1.1460919117729067, -1.41139984131]
+
+    op = orb_params(eci)
+    print('op', op)
+
+    # for dt in arange(0, 1801, 60):
+    #     eci1 = propagate(dt, op)
+    #     # print(dt, eci1)
+    #     ecef1 = eci2ecef(eci1, era_0)
+    #     print(dt, ecef1)
+
+    [x, y, z, xdot, ydot, zdot] = propagate(0, op)
+
+    print('x-x0', x - eci[0])
+    print('y-y0', y - eci[1])
+    print('z-z0', z - eci[2])
+    print('xdot-x0dot', xdot - eci[3])
+    print('ydot-y0dot', ydot - eci[4])
+    print('zdot-z0dot', zdot - eci[5])
+
+    print('diff [km]', 30 * '-')
+
+    eci1 = [x, y, z, xdot, ydot, zdot]
+
+    ecef1 = eci2ecef(eci1, era_0)
+
+    [xe, ye, ze, xedot, yedot, zedot] = ecef1
+
+    print('x-x0', xe - x0)
+    print('y-y0', ye - y0)
+    print('z-z0', ze - z0)
+    print('xdot-x0dot', xedot - x0dot)
+    print('ydot-y0dot', yedot - y0dot)
+    print('zdot-z0dot', zedot - z0dot)
+
